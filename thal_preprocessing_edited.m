@@ -1,0 +1,266 @@
+
+% function thal_preprocessing(subject)
+% spm('defaults', 'FMRI');
+dir_spm         = '/Applications/spm12';
+
+% subject-specific variables 
+%--------------------------------------------------------------------------
+subject = 'NDAREZ098ZPE';
+
+% Define subject parameters and directories
+%==========================================================================
+fs              = filesep;       % platform-specific file separator
+dir_base        = '/Volumes/DYNAMITE/Preprocessing of a few';
+dir_functional  = [dir_base fs subject fs 'func'];
+dir_struct      = [dir_base fs subject fs 'anat'];
+
+%% Unzip zipped files
+
+f       = spm_select('FPList', dir_functional, ['^' subject]);
+gunzip(f(k).name);
+
+%% Unzip
+
+clear all
+zip_files = dir_base('*.gz');
+
+for a = 1:n(zip_files)
+    gunzip(zip_files(a)
+    
+end
+
+n = length(filenames);
+filenames1 = struct('name', {zip_files(1:n).name});
+name = {filenames1.name}.';
+for i=1:n
+    foldername=(name{i});
+    foldername=strrep(foldername,'.gz','')
+    mkdir(foldername);
+    unzip(name{i},foldername);
+end
+
+%% Define what processing we want
+segment           = 1;
+imcalc            = 1;
+realign           = 1;
+coregister        = 1; 
+normalise         = 1;
+smooth            = 1;
+
+
+%% Coregister Structural Images
+%==========================================================================
+if segment
+    clear jobs;
+jobs{1}.spm.spatial.coreg.estwrite.ref = {[dir_struct fs subject '_T1w_MEMPRAGE_SAG_RMS.nii']};
+jobs{1}.spm.spatial.coreg.estwrite.source = {[dir_struct fs subject '_T2_FLAIR.nii']};
+
+jobs{1}.spm.spatial.coreg.estwrite.eoptions.cost_fun = 'nmi';
+jobs{1}.spm.spatial.coreg.estwrite.eoptions.sep = [4 2];
+jobs{1}.spm.spatial.coreg.estwrite.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
+jobs{1}.spm.spatial.coreg.estwrite.eoptions.fwhm = [7 7];
+jobs{1}.spm.spatial.coreg.estwrite.roptions.interp = 4;
+jobs{1}.spm.spatial.coreg.estwrite.roptions.wrap = [0 0 0];
+jobs{1}.spm.spatial.coreg.estwrite.roptions.mask = 0;
+jobs{1}.spm.spatial.coreg.estwrite.roptions.prefix = 'd_';
+
+% Run Jobs
+%--------------------------------------------------------------------------
+spm_jobman('run', jobs);
+clear jobs;
+
+%% Segment Toolbox
+%==========================================================================
+% Estimation options
+%--------------------------------------------------------------------------
+cd(dir_struct);
+jobs{1}.spm.spatial.preproc.channel(1).vols = {[dir_struct fs subject '_T1w_MEMPRAGE_SAG_RMS.nii']};
+jobs{1}.spm.spatial.preproc.channel(1).biasreg = 0.001;
+jobs{1}.spm.spatial.preproc.channel(1).biasfwhm = 60;
+jobs{1}.spm.spatial.preproc.channel(1).write = [0 0];
+% %
+% jobs{1}.spm.spatial.preproc.channel(2).vols = {[dir_struct fs subject '_T2_FLAIR.nii']};
+% jobs{1}.spm.spatial.preproc.channel(2).biasreg = 0.001;
+% jobs{1}.spm.spatial.preproc.channel(2).biasfwhm = 60;
+% jobs{1}.spm.spatial.preproc.channel(2).write = [0 0];
+% %
+% Tissue options
+% --------------------------------------------------------------------------
+jobs{1}.spm.spatial.preproc.tissue(1).tpm = {[dir_spm fs 'tpm\TPM.nii,1']};
+jobs{1}.spm.spatial.preproc.tissue(1).ngaus = 1;
+jobs{1}.spm.spatial.preproc.tissue(1).native = [1 1];
+jobs{1}.spm.spatial.preproc.tissue(1).warped = [0 0];
+jobs{1}.spm.spatial.preproc.tissue(2).tpm = {[dir_spm fs 'tpm\TPM.nii,2']};
+jobs{1}.spm.spatial.preproc.tissue(2).ngaus = 1;
+jobs{1}.spm.spatial.preproc.tissue(2).native = [1 1];
+jobs{1}.spm.spatial.preproc.tissue(2).warped = [0 0];
+jobs{1}.spm.spatial.preproc.tissue(3).tpm = {[dir_spm fs 'tpm\TPM.nii,3']};
+jobs{1}.spm.spatial.preproc.tissue(3).ngaus = 2;
+jobs{1}.spm.spatial.preproc.tissue(3).native = [1 1];
+jobs{1}.spm.spatial.preproc.tissue(3).warped = [0 0];
+jobs{1}.spm.spatial.preproc.tissue(4).tpm = {[dir_spm fs 'tpm\TPM.nii,4']};
+jobs{1}.spm.spatial.preproc.tissue(4).ngaus = 3;
+jobs{1}.spm.spatial.preproc.tissue(4).native = [1 1];
+jobs{1}.spm.spatial.preproc.tissue(4).warped = [0 0];
+jobs{1}.spm.spatial.preproc.tissue(5).tpm = {[dir_spm fs 'tpm\TPM.nii,5']};
+jobs{1}.spm.spatial.preproc.tissue(5).ngaus = 4;
+jobs{1}.spm.spatial.preproc.tissue(5).native = [1 1];
+jobs{1}.spm.spatial.preproc.tissue(5).warped = [0 0];
+jobs{1}.spm.spatial.preproc.tissue(6).tpm = {[dir_spm fs 'tpm\TPM.nii,6']};
+jobs{1}.spm.spatial.preproc.tissue(6).ngaus = 2;
+jobs{1}.spm.spatial.preproc.tissue(6).native = [0 0];
+jobs{1}.spm.spatial.preproc.tissue(6).warped = [0 0];
+
+% Warping options
+% --------------------------------------------------------------------------
+jobs{1}.spm.spatial.preproc.warp.mrf = 1;
+jobs{1}.spm.spatial.preproc.warp.cleanup = 1;
+jobs{1}.spm.spatial.preproc.warp.reg = [0 0.001 0.5 0.05 0.2];
+jobs{1}.spm.spatial.preproc.warp.affreg = 'mni';
+jobs{1}.spm.spatial.preproc.warp.fwhm = 0;
+jobs{1}.spm.spatial.preproc.warp.samp = 3;
+jobs{1}.spm.spatial.preproc.warp.write = [1 1];
+
+% Run Jobs
+%--------------------------------------------------------------------------
+spm_jobman('run', jobs);
+clear jobs;
+end
+
+%% ImageCalc 
+%==========================================================================
+if imcalc;
+cd(dir_struct);
+jobs{1}.spm.util.imcalc.input = {[dir_struct fs subject '_T1w_MEMPRAGE_SAG_RMS.nii']
+                                 [dir_struct fs 'c1' subject '_T1w_MEMPRAGE_SAG_RMS.nii']
+                                 [dir_struct fs 'c2' subject '_T1w_MEMPRAGE_SAG_RMS.nii']};
+                             
+jobs{1}.spm.util.imcalc.output = 'seg4coreg.nii';
+jobs{1}.spm.util.imcalc.outdir = {''};
+jobs{1}.spm.util.imcalc.expression = 'i1.*(i2+i3)';
+jobs{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
+jobs{1}.spm.util.imcalc.options.dmtx = 0;
+jobs{1}.spm.util.imcalc.options.mask = 0;
+jobs{1}.spm.util.imcalc.options.interp = 1;
+jobs{1}.spm.util.imcalc.options.dtype = 4;
+
+% Run Jobs
+%--------------------------------------------------------------------------
+spm_jobman('run', jobs);
+clear jobs;
+end
+
+%% Realign 
+%==========================================================================
+if realign;
+f       = spm_select('ExtFPList', dir_functional, ['^' subject '_Resting_State_1'], Inf);
+files   = cellstr(f);
+
+jobs{1}.spm.spatial.realignunwarp.data(1).scans = files;
+jobs{1}.spm.spatial.realignunwarp.data(1).pmscan = '';
+
+jobs{1}.spm.spatial.realignunwarp.eoptions.quality = 0.9;
+jobs{1}.spm.spatial.realignunwarp.eoptions.sep = 4;
+jobs{1}.spm.spatial.realignunwarp.eoptions.fwhm = 5;
+jobs{1}.spm.spatial.realignunwarp.eoptions.rtm = 1; 
+jobs{1}.spm.spatial.realignunwarp.eoptions.interp = 2;
+jobs{1}.spm.spatial.realignunwarp.eoptions.wrap = [0 0 0];
+jobs{1}.spm.spatial.realignunwarp.eoptions.weight = '';
+
+jobs{1}.spm.spatial.realignunwarp.uweoptions.basfcn = [12 12];
+jobs{1}.spm.spatial.realignunwarp.uweoptions.regorder = 2;
+jobs{1}.spm.spatial.realignunwarp.uweoptions.lambda = 100000;
+jobs{1}.spm.spatial.realignunwarp.uweoptions.jm = 0;
+jobs{1}.spm.spatial.realignunwarp.uweoptions.fot = [4 5];
+jobs{1}.spm.spatial.realignunwarp.uweoptions.sot = [];
+jobs{1}.spm.spatial.realignunwarp.uweoptions.uwfwhm = 4;
+jobs{1}.spm.spatial.realignunwarp.uweoptions.rem = 1;
+jobs{1}.spm.spatial.realignunwarp.uweoptions.noi = 5;
+jobs{1}.spm.spatial.realignunwarp.uweoptions.expround = 'Average';
+
+jobs{1}.spm.spatial.realignunwarp.uwroptions.uwwhich = [2 1];
+jobs{1}.spm.spatial.realignunwarp.uwroptions.rinterp = 4;
+jobs{1}.spm.spatial.realignunwarp.uwroptions.wrap = [0 0 0];
+jobs{1}.spm.spatial.realignunwarp.uwroptions.mask = 1;
+jobs{1}.spm.spatial.realignunwarp.uwroptions.prefix = 'u';
+
+% Run Jobs
+%--------------------------------------------------------------------------
+spm_jobman('run', jobs);
+clear jobs;
+end
+
+%% Coregister
+%==========================================================================
+if coregister 
+
+jobs{1}.spm.spatial.coreg.estwrite.ref = {[dir_struct fs 'seg4coreg.nii,1']};
+jobs{1}.spm.spatial.coreg.estwrite.source = {[dir_functional fs 'meanu' subject '_Resting_State_1_2.5mm.nii']};
+f       = spm_select('ExtFPList', dir_functional, ['^u' subject '*.nii'], Inf);
+files   = cellstr(f);
+jobs{1}.spm.spatial.coreg.estwrite.other = files;
+
+jobs{1}.spm.spatial.coreg.estwrite.eoptions.cost_fun = 'nmi';
+jobs{1}.spm.spatial.coreg.estwrite.eoptions.sep = [4 2];
+jobs{1}.spm.spatial.coreg.estwrite.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
+jobs{1}.spm.spatial.coreg.estwrite.eoptions.fwhm = [7 7];
+jobs{1}.spm.spatial.coreg.estwrite.roptions.interp = 4;
+jobs{1}.spm.spatial.coreg.estwrite.roptions.wrap = [0 0 0];
+jobs{1}.spm.spatial.coreg.estwrite.roptions.mask = 0;
+jobs{1}.spm.spatial.coreg.estwrite.roptions.prefix = 'r_';
+
+% Run Jobs
+%--------------------------------------------------------------------------
+spm_jobman('run', jobs);
+clear jobs;
+
+end
+
+%% Normalise
+%==========================================================================
+if normalise
+jobs{1}.spm.spatial.normalise.estwrite.subj.vol = {[dir_struct fs subject '_T1w_MEMPRAGE_SAG_RMS.nii']};
+f       = spm_select('ExtFPList', dir_functional, ['^r_meanu' subject], Inf);
+files   = cellstr(f);
+jobs{1}.spm.spatial.normalise.estwrite.subj.resample = files;
+
+jobs{1}.spm.spatial.normalise.estwrite.eoptions.biasreg = 0.0001;
+jobs{1}.spm.spatial.normalise.estwrite.eoptions.biasfwhm = 60;
+jobs{1}.spm.spatial.normalise.estwrite.eoptions.tpm = {'/Applications/spm12/tpm/TPM.nii'};
+jobs{1}.spm.spatial.normalise.estwrite.eoptions.affreg = 'mni';
+jobs{1}.spm.spatial.normalise.estwrite.eoptions.reg = [0 0.001 0.5 0.05 0.2];
+jobs{1}.spm.spatial.normalise.estwrite.eoptions.fwhm = 0;
+jobs{1}.spm.spatial.normalise.estwrite.eoptions.samp = 3;
+jobs{1}.spm.spatial.normalise.estwrite.woptions.bb = [-78 -112 -70
+                                                             78 76 85];
+jobs{1}.spm.spatial.normalise.estwrite.woptions.vox = [2 2 2];
+jobs{1}.spm.spatial.normalise.estwrite.woptions.interp = 4;
+jobs{1}.spm.spatial.normalise.estwrite.woptions.prefix = 'w';
+
+% Run Jobs
+%--------------------------------------------------------------------------
+spm_jobman('run', jobs);
+clear jobs;
+end
+
+
+%% Smooth
+%==========================================================================
+if smooth
+f       = spm_select('ExtFPList', dir_functional, ['wr_meanu' subject], Inf);
+files   = cellstr(f);
+jobs{1}.spm.spatial.smooth.data = files;
+jobs{1}.spm.spatial.smooth.fwhm = [4 4 4];
+jobs{1}.spm.spatial.smooth.dtype = 0;
+jobs{1}.spm.spatial.smooth.im = 0;
+jobs{1}.spm.spatial.smooth.prefix = 's';
+
+% Run Jobs
+%--------------------------------------------------------------------------
+spm_jobman('run', jobs);
+clear jobs;
+
+end
+%%
+cd(dir_base);
+end
