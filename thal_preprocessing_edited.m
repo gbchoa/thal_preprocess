@@ -21,22 +21,11 @@ gunzip(f(k).name);
 
 %% Unzip
 
-clear all
 zip_files = dir_base('*.gz');
 
 for a = 1:n(zip_files)
-    gunzip(zip_files(a)
+    gunzip(zip_files(a).name,'pwd');
     
-end
-
-n = length(filenames);
-filenames1 = struct('name', {zip_files(1:n).name});
-name = {filenames1.name}.';
-for i=1:n
-    foldername=(name{i});
-    foldername=strrep(foldername,'.gz','')
-    mkdir(foldername);
-    unzip(name{i},foldername);
 end
 
 %% Define what processing we want
