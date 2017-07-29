@@ -14,18 +14,23 @@ dir_base        = '/Volumes/DYNAMITE/Preprocessing of a few';
 dir_functional  = [dir_base fs subject fs 'func'];
 dir_struct      = [dir_base fs subject fs 'anat'];
 
-%% Unzip zipped files
-
-f       = spm_select('FPList', dir_functional, ['^' subject]);
-gunzip(f(k).name);
-
 %% Unzip
 
-zip_files = dir_base('*.gz');
+dinfo = dir (fullfile (dir_base, '**', '*.gz'));   
 
-for a = 1:n(zip_files)
-    gunzip(zip_files(a).name,'pwd');
-    
+for k = 1 : length(dinfo);
+   gunzip( dinfo(k).name, dinfo(k).folder );  %still needs R2017a or later
+end
+
+%% ??
+
+filePattern = sprintf('%s/**/*.gz', dir_base);   
+allFileInfo = dir(filePattern);
+
+totalNumberOfFiles = length(allFileInfo);
+for k = 1:totalNumberOfFiles;
+    gunzip( allFileInfo(k).name, allFileInfo(k).folder); 
+
 end
 
 %% Define what processing we want
