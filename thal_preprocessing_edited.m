@@ -14,31 +14,6 @@ dir_base        = '/Volumes/DYNAMITE/Preprocessing of a few';
 dir_functional  = [dir_base fs subject fs 'func'];
 dir_struct      = [dir_base fs subject fs 'anat'];
 
-%% Unzip zipped files
-
-f       = spm_select('FPList', dir_functional, ['^' subject]);
-gunzip(f(k).name);
-
-%% Unzip
-
-clear all
-zip_files = dir_base('*.gz');
-
-for a = 1:n(zip_files)
-    gunzip(zip_files(a)
-    
-end
-
-n = length(filenames);
-filenames1 = struct('name', {zip_files(1:n).name});
-name = {filenames1.name}.';
-for i=1:n
-    foldername=(name{i});
-    foldername=strrep(foldername,'.gz','')
-    mkdir(foldername);
-    unzip(name{i},foldername);
-end
-
 %% Define what processing we want
 segment           = 1;
 imcalc            = 1;
