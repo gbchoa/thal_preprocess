@@ -4,17 +4,27 @@
 %--------------------------------------------------------------------------
 % You will need to edit the following to match your own folder structure
 
-Fzipped     = '/Users/roschkoenig/Desktop/GitCode/Thalamic_Connectivity/Unzip Test';  
-Funzipped   = '/Users/roschkoenig/Desktop/GitCode/Thalamic_Connectivity/Unzipped';
+Fzipped     = '/Volumes/DYNAMITE/Preprocessing of a few';  
+Funzipped   = '/Volumes/DYNAMITE/Preprocessing of a few/unzipped';
 fs          = filesep;
-gz_files  	= cellstr(spm_select('FPList', Fzipped, 'gz$'));
-
-for g = 1:length(gz_files)
-    gfile           = gz_files{g};              % Select single file
-    [path fname]    = spm_fileparts(gfile);     % Separate filename from path
-    dotpos          = find(fname == '.');       % Find where extension begins
-    foldname        = fname(1:dotpos-1);        % Folder name = filename without extension
+subject  	= cellstr(spm_select('FPList', pwd, 'dir', '^NDA.*.gz$'));
+  
+% Loop through each individual subject on the hard drive
+for g = 1:length(subject)
+    subfold     = subject{g};
+    gz_files  = cellstr(spm_select('FPList', subfold, 'dir'));
     
-    try mkdir([Funzipped fs foldname]); end     % Make folder if it doesn't already exist
-    gunzip(gfile, [Funzipped fs foldname]);
+    % Loop through each individual image folder within the subject
+    for i = 1:length(gz_files);
+        gfile           = gz_files{g};
+        [path fname]    = spm_fileparts(gfile);
+        dotpos          = find(fname == '.');
+        foldname        = fname(1:dotpos-1);
+        
+        try mkdir([gz_files  '-unzipped']); end
+        
+        gunzip(gfile, [Funzipped fs foldname]);
+        
+    end
 end
+
