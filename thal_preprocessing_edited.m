@@ -1,32 +1,18 @@
 
 % function thal_preprocessing(subject)
 % spm('defaults', 'FMRI');
-dir_spm         = '/Applications/spm12';
+dir_spm         = 'C:\Users\Richard\Desktop\spm';
 
 % subject-specific variables 
 %--------------------------------------------------------------------------
-subject = 'NDAREZ098ZPE';
+subject = 'NDARAA075AMK';
 
 % Define subject parameters and directories
 %==========================================================================
 fs              = filesep;       % platform-specific file separator
-dir_base        = '/Volumes/DYNAMITE/Preprocessing of a few';
+dir_base        = 'C:\Users\Richard\Desktop\Rosch\Subjects';
 dir_functional  = [dir_base fs subject fs 'func'];
 dir_struct      = [dir_base fs subject fs 'anat'];
-
-%% Unzip zipped files
-
-f       = spm_select('FPList', dir_functional, ['^' subject]);
-gunzip(f(k).name);
-
-%% Unzip
-
-zip_files = dir_base('*.gz');
-
-for a = 1:n(zip_files)
-    gunzip(zip_files(a).name,'pwd');
-    
-end
 
 %% Define what processing we want
 segment           = 1;
@@ -142,7 +128,7 @@ end
 %% Realign 
 %==========================================================================
 if realign;
-f       = spm_select('ExtFPList', dir_functional, ['^' subject '_Resting_State_1'], Inf);
+f       = spm_select('ExtFPList', dir_functional, ['^' subject '_Resting_State'], Inf);
 files   = cellstr(f);
 
 jobs{1}.spm.spatial.realignunwarp.data(1).scans = files;
@@ -184,9 +170,10 @@ end
 if coregister 
 
 jobs{1}.spm.spatial.coreg.estwrite.ref = {[dir_struct fs 'seg4coreg.nii,1']};
-jobs{1}.spm.spatial.coreg.estwrite.source = {[dir_functional fs 'meanu' subject '_Resting_State_1_2.5mm.nii']};
-f       = spm_select('ExtFPList', dir_functional, ['^u' subject '*.nii'], Inf);
+jobs{1}.spm.spatial.coreg.estwrite.source = {[dir_functional fs 'meanu' subject '_Resting_State_2.5mm.nii']};
+f       = spm_select('ExtFPList', dir_functional, ['^u' subject '.*.nii'], Inf)
 files   = cellstr(f);
+
 jobs{1}.spm.spatial.coreg.estwrite.other = files;
 
 jobs{1}.spm.spatial.coreg.estwrite.eoptions.cost_fun = 'nmi';
@@ -209,13 +196,15 @@ end
 %==========================================================================
 if normalise
 jobs{1}.spm.spatial.normalise.estwrite.subj.vol = {[dir_struct fs subject '_T1w_MEMPRAGE_SAG_RMS.nii']};
-f       = spm_select('ExtFPList', dir_functional, ['^r_meanu' subject], Inf);
+f       = spm_select('ExtFPList', dir_functional, ['^r_'], Inf);
 files   = cellstr(f);
+
+
 jobs{1}.spm.spatial.normalise.estwrite.subj.resample = files;
 
 jobs{1}.spm.spatial.normalise.estwrite.eoptions.biasreg = 0.0001;
 jobs{1}.spm.spatial.normalise.estwrite.eoptions.biasfwhm = 60;
-jobs{1}.spm.spatial.normalise.estwrite.eoptions.tpm = {'/Applications/spm12/tpm/TPM.nii'};
+jobs{1}.spm.spatial.normalise.estwrite.eoptions.tpm = {'C:\Users\Richard\Desktop\spm\tpm\TPM.nii'};
 jobs{1}.spm.spatial.normalise.estwrite.eoptions.affreg = 'mni';
 jobs{1}.spm.spatial.normalise.estwrite.eoptions.reg = [0 0.001 0.5 0.05 0.2];
 jobs{1}.spm.spatial.normalise.estwrite.eoptions.fwhm = 0;
@@ -236,8 +225,10 @@ end
 %% Smooth
 %==========================================================================
 if smooth
-f       = spm_select('ExtFPList', dir_functional, ['wr_meanu' subject], Inf);
+f       = spm_select('ExtFPList', dir_functional, ['^wr_'], Inf);
 files   = cellstr(f);
+
+
 jobs{1}.spm.spatial.smooth.data = files;
 jobs{1}.spm.spatial.smooth.fwhm = [4 4 4];
 jobs{1}.spm.spatial.smooth.dtype = 0;
@@ -252,4 +243,3 @@ clear jobs;
 end
 %%
 cd(dir_base);
-end
