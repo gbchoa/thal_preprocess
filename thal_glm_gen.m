@@ -1,4 +1,4 @@
-%% function thal_glm_gen(sub)
+function thal_glm_gen(sub)
 
 spm('defaults', 'FMRI');
 spmpath = which('spm');
@@ -7,7 +7,7 @@ dir_spm = spmpath(1:seppos(end) - 1);
 
 %% Define subject parameters and directories
 %==========================================================================
-sub             = 'NDARAA075AMK';                                                 % Needs to change
+% sub             = 'NDARAA536PTU';                                                 % Needs to change
 fs              = filesep;      
 
 dir_base        = 'C:\Users\Richard\Desktop\Rosch\Subjects';                    %% Needs to change
@@ -214,4 +214,4 @@ spm_jobman('run',jobs);
 clear jobs   
 
 end
-
+end

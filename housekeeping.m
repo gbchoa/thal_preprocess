@@ -1,4 +1,4 @@
-%function D = Housekeeping
+function D = Housekeeping
 
 fs = filesep;
 
@@ -14,3 +14,4 @@ spm ('defaults','fmri');
 D.Fbase = Fbase;
 D.FScripts = FScripts;
 D.FPhenotypes = FPhenotypes;
+end

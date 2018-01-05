@@ -2,15 +2,17 @@ function thal_rs_dcm(sub)
 %% Housekeeping
 %==========================================================================
 spm('defaults', 'FMRI');
-dir_spm         = 'D:\My Documents\MATLAB\tools\spm';
+dir_spm         = 'C:\Users\Richard\Desktop\spm';
 
 % subject-specific variables 
 %--------------------------------------------------------------------------
 
+%sub = 'NDARAA075AMK';
+
 % Define subject parameters and directories
 %==========================================================================
 fs              = filesep;       % platform-specific file separator
-dir_base        = 'D:\Research_Data\HCP_Data\rsAnalysis_MNI';
+dir_base        = 'C:\Users\Richard\Desktop\Rosch\Subjects';
 dir_functional  = [dir_base fs sub fs 'func'];
 dir_struct      = [dir_base fs sub fs 'anat'];
 % dir_tract       = [dir_base fs sub fs 'tracts']; 
@@ -23,7 +25,7 @@ TR              = 0.72;
 RT              = TR;
 hpf             = 128;
 
-
+%%
 % Specify DCM
 %==========================================================================
 clear DCM;
@@ -87,8 +89,9 @@ str         = ['DCM_' side{s} '_' area{a}];
 DCM.name    = str;
 
 save(fullfile(dir_dcm,str),'DCM');
-% DCM = spm_dcm_fmri_csd(fullfile(dir_dcm,str));
+DCM = spm_dcm_fmri_csd(fullfile(dir_dcm,str));
 clear DCM
 
+end
 end
 end
